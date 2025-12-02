@@ -1,0 +1,2 @@
+web: ./size_bot
+
