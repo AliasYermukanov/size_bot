@@ -30,11 +30,13 @@ func main() {
 	}
 
 	bot.Debug = false
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Printf("Authorized as @%s", bot.Self.UserName)
+
+	// 🔥 регистрируем команды
+	registerCommands(bot)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
@@ -42,35 +44,73 @@ func main() {
 			continue
 		}
 
-		// Skip if message is not a command
 		if !update.Message.IsCommand() {
 			continue
 		}
 
 		chatID := update.Message.Chat.ID
 		userID := update.Message.From.ID
-
-		// Get command without bot username (handles both /command and /command@botname)
 		command := update.Message.Command()
 
 		switch command {
+
 		case "start":
-			handleStart(bot, chatID)
+			if update.Message.Chat.Type == "private" {
+				handleStart(bot, chatID)
+			}
+
 		case "cock_size":
 			handleCockSize(bot, chatID, userID)
+
+		case "door":
+			handleDoor(bot, chatID, update.Message)
+
 		default:
-			// Only respond to unknown commands in private chats
 			if update.Message.Chat.Type == "private" {
-				msg := tgbotapi.NewMessage(chatID, "Неизвестная команда. Используй /start или /cock_size")
+				msg := tgbotapi.NewMessage(chatID, "Неизвестная команда 🤨")
 				bot.Send(msg)
 			}
 		}
 	}
 }
 
+// ================= COMMAND REGISTRATION =================
+
+func registerCommands(bot *tgbotapi.BotAPI) {
+	// 📌 Команды для групп
+	groupCommands := []tgbotapi.BotCommand{
+		{Command: "door", Description: "🚪 Открыть дверь"},
+		{Command: "cock_size", Description: "🍆 Узнать размер на сегодня"},
+	}
+
+	groupCfg := tgbotapi.NewSetMyCommands(groupCommands...)
+	groupCfg.Scope = &tgbotapi.BotCommandScope{
+		Type: "all_group_chats",
+	}
+	bot.Request(groupCfg)
+
+	// 📌 Команды для лички
+	privateCommands := []tgbotapi.BotCommand{
+		{Command: "start", Description: "Начать"},
+	}
+
+	privateCfg := tgbotapi.NewSetMyCommands(privateCommands...)
+	privateCfg.Scope = &tgbotapi.BotCommandScope{
+		Type: "all_private_chats",
+	}
+	bot.Request(privateCfg)
+}
+
+// ================= HANDLERS =================
+
 func handleStart(bot *tgbotapi.BotAPI, chatID int64) {
-	message := "Привет! Используй /cock_size чтобы узнать свой размер на сегодня."
-	msg := tgbotapi.NewMessage(chatID, message)
+	msg := tgbotapi.NewMessage(
+		chatID,
+		"Привет 👋\n\n"+
+			"Добавь меня в группу и используй:\n"+
+			"/cock_size — узнать размер 🍆\n"+
+			"/door — открыть дверь 🚪",
+	)
 	bot.Send(msg)
 }
 
@@ -83,17 +123,14 @@ func handleCockSize(bot *tgbotapi.BotAPI, chatID int64, userID int64) {
 		userDataMap[userID] = userData
 	}
 
-	// Check if user already got their size today
 	if userData.LastDate == today {
-		message := userData.LastMessage
-		msg := tgbotapi.NewMessage(chatID, message)
+		msg := tgbotapi.NewMessage(chatID, userData.LastMessage)
 		bot.Send(msg)
 		return
 	}
 
-	// Generate new size for today
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	size := r.Intn(25) + 1 // Random number from 1 to 25
+	size := r.Intn(25) + 1
 
 	userData.LastSize = size
 	userData.LastDate = today
@@ -103,11 +140,63 @@ func handleCockSize(bot *tgbotapi.BotAPI, chatID int64, userID int64) {
 	bot.Send(msg)
 }
 
+func handleDoor(bot *tgbotapi.BotAPI, chatID int64, message *tgbotapi.Message) {
+	if message.Chat.Type == "private" {
+		msg := tgbotapi.NewMessage(chatID, "🚫 Команда работает только в группах")
+		bot.Send(msg)
+		return
+	}
+
+	admins, err := bot.GetChatAdministrators(tgbotapi.ChatAdministratorsConfig{
+		ChatConfig: tgbotapi.ChatConfig{ChatID: chatID},
+	})
+	if err != nil {
+		msg := tgbotapi.NewMessage(chatID, "🚪 откройте дверь")
+		bot.Send(msg)
+		return
+	}
+
+	text := "🚪 откройте дверь\n\n"
+	offset := len(text)
+	var entities []tgbotapi.MessageEntity
+
+	for _, admin := range admins {
+		if admin.User.ID == bot.Self.ID {
+			continue
+		}
+
+		if admin.User.UserName != "" {
+			mention := "@" + admin.User.UserName + " "
+			text += mention
+			offset += len(mention)
+		} else {
+			name := admin.User.FirstName
+			if admin.User.LastName != "" {
+				name += " " + admin.User.LastName
+			}
+
+			text += name + " "
+			entities = append(entities, tgbotapi.MessageEntity{
+				Type:   "text_mention",
+				Offset: offset,
+				Length: len(name),
+				User:   admin.User,
+			})
+			offset += len(name) + 1
+		}
+	}
+
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.Entities = entities
+	bot.Send(msg)
+}
+
+// ================= HELPERS =================
+
 func formatSizeMessage(size int) string {
 	messages := getSizeMessages(size)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	randomMessage := messages[r.Intn(len(messages))]
-	return fmt.Sprintf("Твой размер сегодня: %d см\n\n%s", size, randomMessage)
+	return fmt.Sprintf("🍆 Твой размер сегодня: %d см\n\n%s", size, messages[r.Intn(len(messages))])
 }
 
 func getSizeMessages(size int) []string {
