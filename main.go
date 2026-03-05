@@ -18,6 +18,8 @@ type UserData struct {
 
 var userDataMap = make(map[int64]*UserData)
 
+const elsMessage = "🍆 Твой размер сегодня: @els_15 см \n\n с каким только Детей пугать"
+
 func main() {
 	botToken := os.Getenv("BOT_TOKEN")
 	if botToken == "" {
@@ -195,6 +197,11 @@ func handleDoor(bot *tgbotapi.BotAPI, chatID int64, message *tgbotapi.Message) {
 
 func formatSizeMessage(size int) string {
 	messages := getSizeMessages(size)
+
+	if size == 15 {
+		return elsMessage
+	}
+
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return fmt.Sprintf("🍆 Твой размер сегодня: %d см\n\n%s", size, messages[r.Intn(len(messages))])
 }
