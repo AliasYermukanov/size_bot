@@ -251,7 +251,7 @@ func getSizeMessages(size int) []string {
 		return []string{
 			"Чеее происходит @StylebenderAli уже возбудился",
 			"@StylebenderAli будет доказывать что у него больше, жаль не уточнит что в жопе",
-			"Рабочий кабанчик, уважаю 🚀",
+			"@abulkatim бы повешался ради такого",
 		}
 
 	case size <= 20:
