@@ -18,7 +18,9 @@ type UserData struct {
 
 var userDataMap = make(map[int64]*UserData)
 
-const elsMessage = "🍆 Твой размер сегодня: @els_15 см \n\n с каким только Детей пугать"
+const elsMessage = "🍆 Твой размер сегодня: @els_15 см \n\n с таким только детей пугать"
+const alikMessage = "у @AliasYermukanov разводов больше было чем у тебя см"
+const aliMessage = "меньше только у @StylebenderAli"
 
 func main() {
 	botToken := os.Getenv("BOT_TOKEN")
@@ -200,6 +202,10 @@ func formatSizeMessage(size int) string {
 
 	if size == 15 {
 		return elsMessage
+	} else if size == 1 {
+		return alikMessage
+	} else if size == 2 {
+		return aliMessage
 	}
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -210,11 +216,8 @@ func getSizeMessages(size int) []string {
 	switch {
 	case size <= 5:
 		return []string{
-			"Брат… это не кок, это USB Type-C разъём 😭",
+			"@tynezloi у тебя просто член маленький",
 			"Это не член, это насмешка природы 🤣",
-			"Такой только муравьёв пугать, не людей 💀",
-			"Печенье «топлёное молоко» и то длиннее 🤣",
-			"Не переживай… главное — харизма 😭",
 			"Размер как у детской сосиски из Магнума 😭",
 		}
 
@@ -248,11 +251,7 @@ func getSizeMessages(size int) []string {
 	default: // 21–25
 		return []string{
 			"ЭТО НЕ ЧЛЕН. ЭТО ЛЕГЕНДА. 💀🔥",
-			"Гигант. Монстр. Финальный босс Pornhub'а 😈",
-			"Такой только в музее хранить… или в документах Marvel 🦣",
-			"Абсолютный чемпион. Остальным стыдно рядом стоять 🏆",
-			"С таким даже дверь открывать можно — ручка не нужна 😂",
-			"Эпично. Бог дал, чтобы ты страдал в джинсах 😭",
+			"Сантиметров больше чем волос у @rchum",
 			"@nice_kz cock bro",
 		}
 	}
