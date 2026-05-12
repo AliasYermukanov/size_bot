@@ -237,6 +237,7 @@ func getSizeMessages(size int) []string {
 			"@tynezloi у тебя просто член маленький",
 			"Размер как у детской сосиски из Магнума 😭",
 			"Можно считать инвалидностью, но у @Karama_magan еще меньше",
+			"Как говорил @StylebenderAli лучше авик без брони, чем член меньше 5 см",
 		}
 
 	case size <= 10:
@@ -245,6 +246,7 @@ func getSizeMessages(size int) []string {
 			"С таким даже твое имя не запомнят прям как @adilnrglm",
 			"Рыбный четверг у @Aibek09 обеспечен",
 			"Как раз такие любит @Dekirr",
+			"Такой даже @AliasYermukanov не почувствует, у него толер пиздец",
 		}
 
 	case size <= 15:
@@ -252,6 +254,7 @@ func getSizeMessages(size int) []string {
 			"Чеее происходит @StylebenderAli уже возбудился",
 			"@StylebenderAli будет доказывать что у него больше, жаль не уточнит что в жопе",
 			"@abulkatim бы повешался ради такого",
+			"StylebenderAli просил по больше его упоминать, засунь ему этот член в жопу",
 		}
 
 	case size <= 20:
@@ -267,6 +270,7 @@ func getSizeMessages(size int) []string {
 			"С таким точно не останешься без работы как @xRyden",
 			"Сантиметров больше чем волос у @rchum",
 			"@nice_kz cock bro",
+			"прям как clown shoe у @adilnrglm",
 		}
 	}
 }
